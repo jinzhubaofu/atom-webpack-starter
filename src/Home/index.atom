@@ -1,6 +1,5 @@
 <template>
     <div>
-        <img src="cat.jpg" class="avatar" />
         <nav class="nav">
             <a class="nav-item" href="/my/info" data-sf-href="/my/info">my-info</a>
             <a class="nav-item" href="/my/like" data-sf-href="/my/like">my-like</a>

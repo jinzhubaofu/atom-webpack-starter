@@ -12,12 +12,17 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
 const glob = promisify(require('glob'));
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
+const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 
-let pages = glob.sync('src/**/index.atom').map(page => {
+const extractCSS = new ExtractTextPlugin('css/[name].css');
+
+const root = path.join(__dirname, '..');
+
+const pages = glob.sync('src/**/index.atom').map(page => {
     let name = page.slice(4, -11).replace(/\//g, '-').toLowerCase();
     return {
         origin: page,
-        path: path.join(__dirname, '..', page),
+        path: path.join(root, page),
         name: name
     };
 });
@@ -30,8 +35,6 @@ module.exports = {
     }, {}),
     devtool: 'inline-source-map',
     output: {
-        path: path.join(__dirname, '../output/static'),
-        publicPath: '/',
         filename: '[name].js',
         umdNamedDefine: true,
         library: {
@@ -45,8 +48,41 @@ module.exports = {
             {
                 test: /\.atom$/,
                 use: [
-                    'atom-loader'
+                    {
+                        loader: 'atom-loader',
+                        options: {
+                            compile: {
+                                compileJSComponent(val, key) {
+                                    return `require("${val}")`;
+                                },
+                                compilePHPComponent(val, key) {
+                                    return ''
+                                        + 'dirname(__FILE__) . "/" '
+                                        + '. ' + JSON.stringify(val + '.php');
+                                }
+                            },
+                            resolvePhpOutputPath(filePath) {
+                                let outputFilePath = filePath
+                                    .replace(root, '.')
+                                    .replace('src', 'output/template');
+                                return `${outputFilePath}.php`;
+                            },
+                            loaders: {
+                                css: extractCSS.extract({
+                                    fallback: 'style-loader',
+                                    use: 'css-loader'
+                                })
+                            }
+                        }
+                    }
                 ]
+            },
+            {
+                test: /\.css$/,
+                loader: extractCSS.extract({
+                    fallback: 'style-loader',
+                    use: 'css-loader'
+                })
             },
             {
                 test: /\.js$/,
@@ -70,26 +106,18 @@ module.exports = {
         ]
     },
     plugins: [
+        extractCSS,
         // new BundleAnalyzerPlugin(),
-        new ExtractTextPlugin({
-            filename: '[name].css',
-            ignoreOrder: true
+        // new ExtractTextPlugin('[name].css'),
+        new HtmlWebpackHarddiskPlugin({
+            outputPath: 'output/template'
         }),
         ...pages.map(({name, origin}) => new HtmlWebpackPlugin({
             template: 'tools/template.js',
-            filename: `${origin.replace('src', 'output/template')}.html`,
+            filename: `${origin.slice(4).replace(/\.atom$/, '.template.php')}`,
             source: origin,
-            chunks: [name]
+            chunks: [name],
+            alwaysWriteToDisk: true
         }))
     ]
-    // devServer: {
-    //     headers: {
-    //         'Access-Control-Allow-Origin': '*'
-    //     },
-    //     compress: true,
-    //     historyApiFallback: true,
-    //     port,
-    //     hot: true,
-    //     inline: true
-    // }
 };

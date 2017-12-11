@@ -1,23 +1,35 @@
 /**
- * @file server for development
+ * @file express server for development
  * @author leon<ludafa@outlook.com>
  */
 
-const Koa = require('koa');
-const webpack = require('webpack');
-const {devMiddleware} = require('koa-webpack-middleware');
+const express = require('express');
+const path = require('path');
+const php = require('./php-cgi');
+const webpackDevMiddleware = require('webpack-dev-middleware');
 const config = require('./webpack.dev');
-const port = 9000;
-const rewrite = require('koa-rewrite');
-const routes = require('./routes');
+const webpack = require('webpack');
 
-let app = new Koa();
+let app = express();
+let compiler = webpack(config);
 
-routes.forEach(({pattern, component}) => {
-    app.use(rewrite(pattern, `${component.replace('src', '/output/template')}.html`));
-});
+// 将配置的路由转到 php 处理
+app.use((routes => {
 
-app.use(devMiddleware(webpack(config), {
+    return php.cgi({
+        match: ({pathname}) => {
+            for (let {pattern, component} of routes) {
+                if (pattern === pathname) {
+                    return true;
+                }
+            }
+        },
+        index: path.join(__dirname, './server.php')
+    });
+
+})(require('./routes')));
+
+app.use(webpackDevMiddleware(compiler, {
 
     // display no info to console (only warnings and errors)
     noInfo: false,
@@ -25,8 +37,7 @@ app.use(devMiddleware(webpack(config), {
     // display nothing to the console
     quiet: false,
 
-    // switch into lazy mode
-    // that means no watching, but recompilation on every request
+    // 直接关闭 lazy 模式，在启动时直接开始 watching，触发编译，生成每个页面的入口 php
     lazy: false,
 
     // watch options (only lazy: false)
@@ -40,7 +51,9 @@ app.use(devMiddleware(webpack(config), {
     // publicPath: "/assets/",
 
     // custom headers
-    headers: { "X-Custom-Header": "yes" },
+    headers: {
+        'Access-Control-Allow-Origin': '*'
+    },
 
     // options for formating the statistics
     stats: {
@@ -49,4 +62,4 @@ app.use(devMiddleware(webpack(config), {
 
 }));
 
-app.listen(port, () => console.log(`server: http://localhost:${port}`));
+app.listen(8080, () => console.log('server up'));
