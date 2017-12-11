@@ -1,18 +1,79 @@
 <template>
-    <div class="main">
-        <layout />
-        this is atom
+    <div>
+        <img src="cat.jpg" class="avatar" />
+        <nav class="nav">
+            <a class="nav-item" href="/my/info" data-sf-href="/my/info">my-info</a>
+            <a class="nav-item" href="/my/like" data-sf-href="/my/like">my-like</a>
+        </nav>
+        <ul class="posts">
+            <li a-for="post in posts" class="post">
+                <post
+                    :title="post.title"
+                    :id="post.id"
+                    :description="post.description"
+                    :createTime="post.createTime" />
+            </li>
+        </ul>
     </div>
 </template>
+
 <script type="config">
 {
+    props: ['test', 'age'],
+    data: {
+        name: 'ludafa',
+        like: 1
+    },
     components: {
-        'layout': '../common/component/Layout.atom'
+        'app-layout': '../common/component/Layout.atom',
+        'post': './Post.atom'
     }
 }
 </script>
+
 <style scoped>
-.main {
+.title {
+    color: cadetblue;
+    font-size: 1rem;
+    margin: .5rem 0
+}
+.title:before {
+    content: '#';
+    color: #666;
+    margin: .5rem;
+}
+.avatar {
+    width: 100%;
+}
+.posts {
+    list-style: none;
+    margin: 0;
+    padding: 0
+}
+.post {
+    margin-top: 1rem;
+    padding: .5rem;
+}
+.nav {
     display: flex;
+    height: 2rem;
+    align-items: center;
+    justify-content: center;
+}
+.nav-item {
+    flex: 1 1 auto;
+    text-align: center;
+    color: rgb(0, 159, 147);
+    text-decoration: none;
 }
 </style>
+
+<script>
+module.exports = {
+    methods: {
+        addLike() {
+            this.like++;
+        }
+    }
+};
+</script>

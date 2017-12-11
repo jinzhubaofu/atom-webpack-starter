@@ -1,3 +1,25 @@
 <template>
-    <div>layout</div>
+    <main>
+        <section>
+            <slot name="main" />
+        </section>
+        <aside>
+            <slot name="aside" />
+        </aside>
+    </main>
 </template>
+<style>
+main {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: stretch;
+}
+section {
+    flex: 1 1 auto;
+}
+aside {
+    flex: 0 0 auto;
+    width: 10rem;
+    background-color: green;
+}
+</style>

@@ -6,6 +6,7 @@
   "scripts": {
     "build:php": "rimraf output/template && gulp",
     "watch": "npm run build:php && gulp watch",
+    "start": "NODE_ENV=dev webpack-dev-server --config tools/webpack.dev.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -15,18 +16,24 @@
     "vip-server-renderer": "^1.0.47"
   },
   "devDependencies": {
-    "atom-loader": "git+ssh://g@gitlab.baidu.com:8022/vue-in-php/atom-loader.git",
+    "atom-loader": "git+ssh://g@gitlab.baidu.com:8022/vue-in-php/atom-loader.git#master",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "css-loader": "^0.28.7",
     "extract-text-webpack-plugin": "^3.0.2",
     "file-loader": "^1.1.5",
     "gulp": "^3.9.1",
-    "html-webpack-plugin": "^2.30.1",
-    "php-loader": "^0.2.0",
-    "style-loader": "^0.19.0",
     "gulp-atom-compiler": "^1.0.0-alpha.1",
+    "html-loader": "^0.5.1",
+    "html-webpack-plugin": "^2.30.1",
+    "koa": "^2.4.1",
+    "koa-rewrite": "^3.0.0",
+    "koa-webpack-middleware": "^1.0.7",
+    "php-loader": "^0.2.0",
     "rimraf": "^2.6.2",
-    "webpack": "^3.10.0"
+    "style-loader": "^0.19.0",
+    "webpack": "^3.10.0",
+    "webpack-bundle-analyzer": "^2.9.1",
+    "webpack-dev-server": "^2.9.7"
   }
 }
