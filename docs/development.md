@@ -6,27 +6,27 @@
 
 ## webpack 编译
 
-### 启动的同时开始 webpack 编译
+### 1. 启动的同时开始 webpack 编译
 
 这么做的原因是我们的 SSR 处理过程需要使用 webpack 的构建产物 `*.atom.php` 和 `*.template.php` 才能进行。
 
-### 入口 atom
+### 2. 入口 atom
 
 1. 入口 atom 我们是依靠约定 `index.atom` 为入口来进行标识的，即所有的 `index.atom` 都是一个页面的入口；
-2. 入口 atom 转化为 entry 的规则是：SomeCategory/SomePage => some-category-some-page；
+2. 入口 atom 转化为 entry 的规则是：SomeCategory/SomePage => somecategory-somepage；
 3. 入口的启动封装 EntryLoader
 
     atom 在 html 中启动需要额外配合 `common/index` 以及后端输出的数据才能启动。
 
     因此，我们给 `index.atom` 添加了一个特殊的 `EntryLoader`。`EntryLoader` 会把 *.atom 进行包裹，并用 `common/index` 启动它。
 
-### *.atom.php 的生成
+### 3. *.atom.php 的生成
 
 *.atom.php 的产生是由 `atom-loader` 来完成的。
 
 需要给 `atom-loader` 添加 `resolvePhpOutputPath` 来指定 php 的输出目录。
 
-### 页面入口模板的生成
+### 4. 页面入口模板的生成
 
 页面入口模板是由 `webpack` 中的 `html-webpack-plugin` 生成的。
 

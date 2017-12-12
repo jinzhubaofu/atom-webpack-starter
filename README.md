@@ -25,6 +25,16 @@
 
 接下来你就可以开始开发了。
 
+此外，我们还提供了以下快捷脚本：
+
+```sh
+# 进行生产环境构建
+npm run build
+
+# 在本地以生产环境预览
+npm run preview
+```
+
 ### 项目详情
 
 本章节涉及开发中的一系列约定和规范，请注意。
@@ -77,7 +87,7 @@ src
 
     > 强调：此条规则涉及到调试、构建以及与后端的配合，请务必遵守。
 
-2. A页面不允许引用(依赖)其他页面中的模块，比如：
+2. 页面不允许引用(依赖)其他页面中的模块，比如：
 
     ```js
     // 当前文件是 src/Home/index.js
@@ -165,7 +175,7 @@ output
 
 2. `template` 目录下是所有在 SSR 过程需要的 php 文件：
 
-    1. x.template.php 是每个页面的入口模板，
+    1. *.template.php 是每个页面的入口模板，
 
         这个 php 文件中只包含了对应页面的主入口 chunk 和 vendor chunk。
 
@@ -213,7 +223,7 @@ output
 
     我们做了一个简易封装，使得 Atom 的模板管理更简单、更明确。
 
-    你可以在[这里](https://github.com/jinzhubaofu/atom-webpack-starter/blob/master/tools/AtomWrapper.class.php)找到 AtomWrapper 的源码。
+    你可以在[这里](tools/AtomWrapper.class.php)找到 AtomWrapper 的源码。
 
     > 请下载此源码，并在合适的位置引入
 
@@ -261,7 +271,7 @@ output
 
 对于后端服务来讲（php开发同学），除了 `atom` 的 php runtime 之外，我们还需要提供构建产物中的 `template` 目录。
 
-> 我们提供了一个简单的本地开发服务器，使用了 AtomWrapper，可供[参考](https://github.com/jinzhubaofu/atom-webpack-starter/blob/master/tools/server.php)
+> 我们提供了一个简单的本地开发服务器，使用了 AtomWrapper，可供[参考](tools/server.php)
 
 ### mock 数据
 
@@ -306,7 +316,7 @@ module.exports = function (request) {
 
 #### atom 组件中的标签 `<img>` 的属性 `src` 不能使用相对路径
 
-由于 atom php 组件目前不能进行 AST 解析，不能将 src 中的值转化为 webpack 能支持的 require，在构建后不能匹配到正确的资源，因此不能使用。
+由于 atom 组件的 template 部分没有提供 AST 信息，不能将 src 中的值转化为 webpack 所需要的 require，在构建后不能匹配到正确的资源，因此不能使用。
 
 这种情况可以有两种方案来解决：
 
