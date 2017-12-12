@@ -29,37 +29,43 @@ app.use((routes => {
 
 })(require('./routes.json')));
 
-app.use(webpackDevMiddleware(compiler, {
 
-    // display no info to console (only warnings and errors)
-    noInfo: false,
+if (process.env.NODE_ENV === 'dev') {
+    app.use(webpackDevMiddleware(compiler, {
 
-    // display nothing to the console
-    quiet: false,
+        // display no info to console (only warnings and errors)
+        noInfo: false,
 
-    // 直接关闭 lazy 模式，在启动时直接开始 watching，触发编译，生成每个页面的入口 php
-    lazy: false,
+        // display nothing to the console
+        quiet: false,
 
-    // watch options (only lazy: false)
-    watchOptions: {
-        aggregateTimeout: 300,
-        poll: true
-    },
+        // 直接关闭 lazy 模式，在启动时直接开始 watching，触发编译，生成每个页面的入口 php
+        lazy: false,
 
-    // public path to bind the middleware to
-    // use the same as in webpack
-    // publicPath: "/assets/",
+        // watch options (only lazy: false)
+        watchOptions: {
+            aggregateTimeout: 300,
+            poll: true
+        },
 
-    // custom headers
-    headers: {
-        'Access-Control-Allow-Origin': '*'
-    },
+        // public path to bind the middleware to
+        // use the same as in webpack
+        // publicPath: "/assets/",
 
-    // options for formating the statistics
-    stats: {
-        colors: true
-    }
+        // custom headers
+        headers: {
+            'Access-Control-Allow-Origin': '*'
+        },
 
-}));
+        // options for formating the statistics
+        stats: {
+            colors: true
+        }
+
+    }));
+}
+else {
+    app.use(express.static(path.join(__dirname, '../output')));
+}
 
 app.listen(8080, () => console.log('wait for webpack to compile'));

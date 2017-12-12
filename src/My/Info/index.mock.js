@@ -4,5 +4,6 @@
  */
 
 module.exports = {
-    name: 'x'
+    name: 'ludafa',
+    age: 18
 };
