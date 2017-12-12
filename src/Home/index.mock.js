@@ -4,18 +4,6 @@
  */
 
 module.exports = {
-    sfHeader: {
-        title: 'ATOM',
-        subTitle: '',
-        // tools: [
-        //     `
-        //     <svg height="28" width="28" viewBox="0 0 24 24">
-        //         <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
-        //     </svg>
-        //     `
-        // ],
-        back: ''
-    },
     posts: [
         {
             title: 'how to setup',
@@ -48,6 +36,5 @@ module.exports = {
             description: `Quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt. Non numquam eius modi tempora incidunt ut labore et dolore magnam aliquam quaerat voluptatem. Temporibus autem quibusdam et aut officiis debitis aut rerum necessitatibus saepe eveniet ut et voluptates repudiandae sint et molestiae non recusandae. Fugiat quo voluptas nulla pariatur? Qui officia deserunt mollit anim id est laborum. Esse cillum dolore eu fugiat nulla pariatur. Laboris nisi ut aliquip ex ea commodo consequat.`
         }
     ],
-    test: 'ludafa',
-    age: 0
+    title: 'atom webpack starter'
 };

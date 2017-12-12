@@ -1,6 +1,6 @@
 <template>
     <section>
-        my/info
+        <tabs :tabs="tabs" />
         <h4>name: {{name}}</h4>
         <p>age: {{age}}</p>
     </section>
@@ -8,8 +8,27 @@
 <script type="config">
 {
     props: ['name', 'age'],
+    data: {
+        tabs: [
+            {
+                href: '/',
+                active: false,
+                label: 'home'
+            },
+            {
+                label: 'my info',
+                href: '/my/info',
+                active: true
+            },
+            {
+                label: 'my likes',
+                href: '/my/like',
+                active: false
+            }
+        ]
+    },
     components: {
-        'foo': '../common/component/Foo.atom'
+        'tabs': '../common/component/Tabs.atom'
     }
 }
 </script>

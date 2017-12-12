@@ -5,7 +5,11 @@
 
 const fs = require('fs');
 const path = require('path');
+const swig = require('swig');
+const template = swig.compile(
+    fs.readFileSync(path.resolve('tools/template.php'), 'utf8')
+);
 
 module.exports = function ({htmlWebpackPlugin}) {
-    return fs.readFileSync(path.resolve('tools/template.php'), 'utf8');
+    return template(htmlWebpackPlugin);
 };

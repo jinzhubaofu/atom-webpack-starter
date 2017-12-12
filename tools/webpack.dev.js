@@ -12,6 +12,7 @@ const webpack = require('webpack');
 const glob = require('glob');
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
+const entryLoader = require('./EntryLoader');
 
 const root = path.join(__dirname, '..');
 
@@ -24,12 +25,13 @@ const pages = glob.sync('src/**/index.atom').map(page => {
     };
 });
 
+const entries = pages.reduce((entries, page) => {
+    entries[page.name] = page.path;
+    return entries;
+}, {});
 
 module.exports = {
-    entry: pages.reduce((entries, page) => {
-        entries[page.name] = [page.path, path.join(__dirname, '../src/common/index.js')];
-        return entries;
-    }, {}),
+    entry: entries,
     devtool: 'inline-source-map',
     output: {
         filename: '[name].js',
@@ -42,6 +44,18 @@ module.exports = {
     },
     module: {
         rules: [
+            {
+                test: /index\.atom$/,
+                use: [
+                    'babel-loader',
+                    {
+                        loader: path.resolve('tools/EntryLoader.js'),
+                        options: {
+
+                        }
+                    }
+                ]
+            },
             {
                 test: /\.atom$/,
                 use: [
@@ -91,12 +105,6 @@ module.exports = {
                 loader: 'file-loader'
             },
             {
-                test: /\.php$/,
-                use: [{
-                    loader: path.resolve('tools/php-loader.js')
-                }]
-            },
-            {
                 test: /\.html$/,
                 use: 'html-loader'
             }
@@ -104,16 +112,23 @@ module.exports = {
     },
     plugins: [
         // new BundleAnalyzerPlugin(),
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            filename: 'vendor.js',
+            minChunks: 0
+        }),
         new ExtractTextPlugin('[name].css'),
         new HtmlWebpackHarddiskPlugin({
             outputPath: 'output/template'
         }),
+        // 为每个页面创建一个 template php 模板
         ...pages.map(({name, origin}) => new HtmlWebpackPlugin({
             template: 'tools/template.js',
             filename: `${origin.slice(4).replace(/\.atom$/, '.template.php')}`,
+            chunks: ['vendor', name],
+            alwaysWriteToDisk: true,
             source: origin,
-            chunks: [name],
-            alwaysWriteToDisk: true
+            name: name
         }))
     ]
 };

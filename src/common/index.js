@@ -29,3 +29,9 @@ export function init(MainComponent, data, props) {
         }
     });
 }
+
+export function createEntry(Component) {
+    return function (...args) {
+        init(Component, ...args);
+    };
+}

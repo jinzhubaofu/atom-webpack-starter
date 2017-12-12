@@ -62,4 +62,4 @@ app.use(webpackDevMiddleware(compiler, {
 
 }));
 
-app.listen(8080, () => console.log('server up'));
+app.listen(8080, () => console.log('wait for webpack to compile'));
