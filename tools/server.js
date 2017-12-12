@@ -27,7 +27,7 @@ app.use((routes => {
         index: path.join(__dirname, './server.php')
     });
 
-})(require('./routes')));
+})(require('./routes.json')));
 
 app.use(webpackDevMiddleware(compiler, {
 

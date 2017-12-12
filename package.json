@@ -14,7 +14,7 @@
     "vip-server-renderer": "^1.0.47"
   },
   "devDependencies": {
-    "atom-loader": "0.0.6",
+    "atom-loader": "0.0.7",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "css-loader": "^0.28.7",

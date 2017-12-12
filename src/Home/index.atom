@@ -15,7 +15,6 @@
         </ul>
     </div>
 </template>
-
 <script type="config">
 {
     props: ['test', 'age'],
@@ -29,7 +28,6 @@
     }
 }
 </script>
-
 <style scoped>
 .title {
     color: cadetblue;
@@ -66,9 +64,12 @@
     text-decoration: none;
 }
 </style>
-
 <script>
 module.exports = {
+    data: {
+        test: 1,
+        age: 100
+    },
     methods: {
         addLike() {
             this.like++;
