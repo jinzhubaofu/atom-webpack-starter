@@ -4,7 +4,15 @@
         "component": "Home/index"
     },
     {
-        "pattern": "/Todo",
-        "component": "Todo/index"
+        "pattern": "/post",
+        "component": "Post/index"
+    },
+    {
+        "pattern": "/my/info",
+        "component": "My/Info/index"
+    },
+    {
+        "pattern": "/my/like",
+        "component": "My/Like/index"
     }
 ]

@@ -3,18 +3,15 @@
  * @author leon<ludafa@outlook.com>
  */
 
-const {promisify} = require('util');
 const fs = require('fs');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const port = process.env.PORT || 9000;
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
-const glob = promisify(require('glob'));
+const glob = require('glob');
 const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
-
-const extractCSS = new ExtractTextPlugin('css/[name].css');
 
 const root = path.join(__dirname, '..');
 
@@ -68,7 +65,7 @@ module.exports = {
                                 return `${outputFilePath}.php`;
                             },
                             loaders: {
-                                css: extractCSS.extract({
+                                css: ExtractTextPlugin.extract({
                                     fallback: 'style-loader',
                                     use: 'css-loader'
                                 })
@@ -79,7 +76,7 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                loader: extractCSS.extract({
+                loader: ExtractTextPlugin.extract({
                     fallback: 'style-loader',
                     use: 'css-loader'
                 })
@@ -106,9 +103,8 @@ module.exports = {
         ]
     },
     plugins: [
-        extractCSS,
         // new BundleAnalyzerPlugin(),
-        // new ExtractTextPlugin('[name].css'),
+        new ExtractTextPlugin('[name].css'),
         new HtmlWebpackHarddiskPlugin({
             outputPath: 'output/template'
         }),
