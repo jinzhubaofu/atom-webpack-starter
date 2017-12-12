@@ -10,7 +10,6 @@ const port = process.env.PORT || 9000;
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
 const glob = require('glob');
-const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const entryLoader = require('./EntryLoader');
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
@@ -34,8 +33,8 @@ const entries = pages.reduce((entries, page) => {
 module.exports = {
     entry: entries,
     output: {
-        path: path.resolve('output'),
-        filename: 'static/[name].[chunkhash:8].js',
+        path: path.resolve('output/static'),
+        filename: '[name].[chunkhash:8].js',
         umdNamedDefine: true,
         library: {
             root: 'main',
@@ -113,21 +112,30 @@ module.exports = {
         ]
     },
     plugins: [
-        // new BundleAnalyzerPlugin(),
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
-            filename: 'static/vendor.[chunkhash:8].js',
+            filename: 'vendor.[chunkhash:8].js',
             minChunks: 0
         }),
-        new ExtractTextPlugin('static/[name].[contenthash:8].css'),
+        new ExtractTextPlugin('[name].[contenthash:8].css'),
         // 为每个页面创建一个 template php 模板
-        ...pages.map(({name, origin}) => new HtmlWebpackPlugin({
-            template: 'tools/template.js',
-            filename: `template/${origin.slice(4).replace(/\.atom$/, '.template.php')}`,
-            chunks: ['vendor', name],
-            source: origin,
-            name: name
-        })),
+        ...pages.map(({name, origin}) => {
+
+            let filename = path.join(
+                __dirname,
+                '../output/template',
+                `${origin.slice(4).replace(/\.atom$/, '.template.php')}`
+            );
+
+            return new HtmlWebpackPlugin({
+                template: 'tools/template.js',
+                filename: filename,
+                chunks: ['vendor', name],
+                source: origin,
+                name: name
+            });
+
+        }),
         new webpack.optimize.UglifyJsPlugin({
             compress: {
                 warnings: false

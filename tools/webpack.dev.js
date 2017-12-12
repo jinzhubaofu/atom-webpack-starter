@@ -10,7 +10,6 @@ const port = process.env.PORT || 9000;
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
 const glob = require('glob');
-const {BundleAnalyzerPlugin} = require('webpack-bundle-analyzer');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const entryLoader = require('./EntryLoader');
 
@@ -111,7 +110,6 @@ module.exports = {
         ]
     },
     plugins: [
-        // new BundleAnalyzerPlugin(),
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
             filename: 'vendor.js',

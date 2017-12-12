@@ -9,6 +9,7 @@ const php = require('./php-cgi');
 const webpackDevMiddleware = require('webpack-dev-middleware');
 const config = require('./webpack.dev');
 const webpack = require('webpack');
+const port = process.env.PORT || 8080;
 
 let app = express();
 let compiler = webpack(config);
@@ -65,7 +66,13 @@ if (process.env.NODE_ENV === 'dev') {
     }));
 }
 else {
-    app.use(express.static(path.join(__dirname, '../output')));
+    app.use(express.static(path.join(__dirname, '../output/static')));
 }
 
-app.listen(8080, () => console.log('wait for webpack to compile'));
+app.listen(port, () => {
+    console.log(
+        process.env.NODE_ENV === 'dev'
+            ? `wait for webpack to compile, http://localhost:${port}`
+            : `server up: http://localhost:${port}`
+    );
+});
