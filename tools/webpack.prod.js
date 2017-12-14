@@ -5,17 +5,17 @@
 
 const fs = require('fs');
 const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const port = process.env.PORT || 9000;
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const webpack = require('webpack');
 const glob = require('glob');
+
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
-const entryLoader = require('./EntryLoader');
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
+const atomStyleCompiler = require('./atom-style-compiler');
 
+const port = process.env.PORT || 9000;
 const root = path.join(__dirname, '..');
-
 const pages = glob.sync('src/**/index.atom').map(page => {
     let name = page.slice(4, -11).replace(/\//g, '-').toLowerCase();
     return {
@@ -49,12 +49,7 @@ module.exports = {
                 test: /index\.atom$/,
                 use: [
                     'babel-loader',
-                    {
-                        loader: path.resolve('tools/EntryLoader.js'),
-                        options: {
-
-                        }
-                    }
+                    path.resolve('tools/entry-loader.js')
                 ]
             },
             {
@@ -71,7 +66,8 @@ module.exports = {
                                     return ''
                                         + 'dirname(__FILE__) . "/" '
                                         + '. ' + JSON.stringify(val + '.php');
-                                }
+                                },
+                                compileStyle: atomStyleCompiler
                             },
                             resolvePhpOutputPath(filePath) {
                                 let outputFilePath = filePath
