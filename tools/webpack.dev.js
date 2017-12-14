@@ -13,6 +13,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 
 const atomStyleCompiler = require('./atom-style-compiler');
+const atomScriptCompiler = require('./atom-script-compiler');
 
 const port = process.env.PORT || 9000;
 const root = path.join(__dirname, '..');
@@ -26,31 +27,35 @@ const pages = glob.sync('src/**/index.atom').map(page => {
 });
 
 const entries = pages.reduce((entries, page) => {
-    entries[page.name] = page.path;
+    entries[page.name] = [page.path];
     return entries;
-}, {});
+}, {
+    bootstrap: path.join(__dirname, '../src/common/index.js')
+});
 
 module.exports = {
     entry: entries,
     devtool: 'inline-source-map',
     output: {
         filename: '[name].js',
+        chunkFilename: '[name].js',
         umdNamedDefine: true,
         library: {
             root: 'main',
             amd: 'atom-webpack-starter/[name]'
         },
-        libraryTarget: 'umd'
+        libraryTarget: 'umd',
+        publicPath: '/'
     },
     module: {
         rules: [
-            {
-                test: /index\.atom$/,
-                use: [
-                    'babel-loader',
-                    path.resolve('tools/entry-loader.js')
-                ]
-            },
+            // {
+            //     test: /index\.atom$/,
+            //     use: [
+            //         'babel-loader',
+            //         path.resolve('tools/entry-loader.js')
+            //     ]
+            // },
             {
                 test: /\.atom$/,
                 use: [
@@ -66,7 +71,8 @@ module.exports = {
                                         + 'dirname(__FILE__) . "/" '
                                         + '. ' + JSON.stringify(val + '.php');
                                 },
-                                compileStyle: atomStyleCompiler
+                                compileStyle: atomStyleCompiler,
+                                compileJsScript: atomScriptCompiler
                             },
                             resolvePhpOutputPath(filePath) {
                                 let outputFilePath = filePath
@@ -107,10 +113,15 @@ module.exports = {
         ]
     },
     plugins: [
+        new webpack.WatchIgnorePlugin([
+            'output'
+        ]),
         new webpack.optimize.CommonsChunkPlugin({
             name: 'vendor',
             filename: 'vendor.js',
-            minChunks: 0
+            minChunks: module => (
+                module.context && module.context.includes('node_modules')
+            )
         }),
         new ExtractTextPlugin('[name].css'),
         new HtmlWebpackHarddiskPlugin({
@@ -120,7 +131,7 @@ module.exports = {
         ...pages.map(({name, origin}) => new HtmlWebpackPlugin({
             template: 'tools/template.js',
             filename: `${origin.slice(4).replace(/\.atom$/, '.template.php')}`,
-            chunks: ['vendor', name],
+            chunks: ['vendor', name, 'bootstrap'],
             alwaysWriteToDisk: true,
             source: origin,
             name: name

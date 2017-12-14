@@ -10,6 +10,8 @@ const webpackDevMiddleware = require('webpack-dev-middleware');
 const config = require('./webpack.dev');
 const webpack = require('webpack');
 const port = process.env.PORT || 8080;
+const URL = require('url');
+const fs = require('fs');
 
 let app = express();
 let compiler = webpack(config);
@@ -17,16 +19,60 @@ let compiler = webpack(config);
 // 将配置的路由转到 php 处理
 app.use((routes => {
 
-    return php.cgi({
-        match: ({pathname}) => {
-            for (let {pattern, component} of routes) {
-                if (pattern === pathname) {
-                    return true;
-                }
-            }
-        },
+    let match = ({pathname}) => routes.find(
+        ({pattern}) => (pattern === pathname)
+    );
+
+    let phpMiddleware = php.cgi({
+        match: match,
         index: path.join(__dirname, './server.php')
     });
+
+    return async function (req, res, next) {
+
+        let url = URL.parse(req.url);
+        let route = match(url);
+
+        if (!route) {
+            next();
+            return;
+        }
+
+        if (req.headers.accept !== 'application/json') {
+            phpMiddleware.call(this, req, res, next);
+            return;
+        }
+
+        let {component} = route;
+
+        let mocker = path.join(__dirname, '../src', `${component}.mock.js`);
+
+        if (!fs.existsSync(mocker)) {
+            res.sendStatus(404);
+            return;
+        }
+
+        try {
+
+            let data = require(mocker);
+
+            if (typeof data === 'function') {
+                data = data(url);
+            }
+
+            if (data && typeof data.then === 'function') {
+                data = await data;
+            }
+
+            res.json(data);
+
+            return;
+        }
+        catch (e) {
+            res.sendStatus(500);
+        }
+
+    };
 
 })(require('./routes.json')));
 

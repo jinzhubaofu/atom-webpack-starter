@@ -1,6 +1,17 @@
 {
     "presets": [
-        "es2015",
-        "stage-1"
+        [
+            "env",
+            {
+                "targets": {
+                    "browsers": ["chrome >= 60"]
+                },
+                "modules": "commonjs",
+                "useBuiltIns": true
+            }
+        ]
+    ],
+    "plugins": [
+        "syntax-dynamic-import"
     ]
 }

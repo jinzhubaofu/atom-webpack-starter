@@ -10,8 +10,19 @@
     <meta name="x5-orientation" content="portrait">
 </head>
 <body>
-<div [atom-root]>
+<nav id="main-nav">
+    <ul>
+        <li>
+            <a href="/my/info">info</a>
+        </li>
+        <li>
+            <a href="/my/like">like</a>
+        </li>
+    </ul>
+</nav>
+<div id="app">
 <?php echo $atom['html'] ?>
+</div>
 <script>
 var props = window.__COMPONENT_PROPS__ = <?php echo json_encode($atom['props']) ?>;
 var data = window.__DATA__ = {};
@@ -25,6 +36,5 @@ if ($atom['props'] != null && !empty($atom['props'])) {
 }
 ?>
 </script>
-</div>
 </body>
 </html>
