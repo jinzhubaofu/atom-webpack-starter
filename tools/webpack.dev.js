@@ -11,6 +11,7 @@ const glob = require('glob');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const AssetsPlugin = require('assets-webpack-plugin');
 
 const atomStyleCompiler = require('./atom-style-compiler');
 const atomScriptCompiler = require('./atom-script-compiler');
@@ -27,11 +28,16 @@ const pages = glob.sync('src/**/index.atom').map(page => {
 });
 
 const entries = pages.reduce((entries, page) => {
-    entries[page.name] = [page.path];
+    entries[page.name] = page.path;
     return entries;
 }, {
-    bootstrap: path.join(__dirname, '../src/common/index.js')
+    bootstrap: [
+        'vip-server-renderer/js/atom',
+        path.resolve('src/common/index.js')
+    ]
 });
+
+let chunkIndex = 0;
 
 module.exports = {
     entry: entries,
@@ -39,12 +45,12 @@ module.exports = {
     output: {
         filename: '[name].js',
         chunkFilename: '[name].js',
-        umdNamedDefine: true,
-        library: {
-            root: 'main',
-            amd: 'atom-webpack-starter/[name]'
-        },
-        libraryTarget: 'umd',
+        // umdNamedDefine: true,
+        // library: {
+        //     root: 'main',
+        //     amd: 'atom-webpack-starter/[name]'
+        // },
+        // libraryTarget: 'umd',
         publicPath: '/'
     },
     module: {
@@ -113,17 +119,26 @@ module.exports = {
         ]
     },
     plugins: [
-        new webpack.WatchIgnorePlugin([
-            'output'
-        ]),
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'vendor',
-            filename: 'vendor.js',
-            minChunks: module => (
-                module.context && module.context.includes('node_modules')
-            )
+        new AssetsPlugin({
+            prettyPrint: true
         }),
-        new ExtractTextPlugin('[name].css'),
+        new webpack.NamedChunksPlugin(),
+        // new webpack.NamedModulesPlugin(),
+        new webpack.WatchIgnorePlugin([
+            '**/*.php'
+        ]),
+        // new webpack.optimize.CommonsChunkPlugin({
+        //     names: ['vendor'],
+        //     filename: '[name].js',
+        //     minChunks: Infinity
+        //     // module => (
+        //     //     module.context && module.context.includes('node_modules')
+        //     // )
+        // }),
+        new ExtractTextPlugin({
+            filename: '[name].css'
+            // allChunks: true
+        }),
         new HtmlWebpackHarddiskPlugin({
             outputPath: 'output/template'
         }),
@@ -131,7 +146,7 @@ module.exports = {
         ...pages.map(({name, origin}) => new HtmlWebpackPlugin({
             template: 'tools/template.js',
             filename: `${origin.slice(4).replace(/\.atom$/, '.template.php')}`,
-            chunks: ['vendor', name, 'bootstrap'],
+            chunks: ['bootstrap'],
             alwaysWriteToDisk: true,
             source: origin,
             name: name

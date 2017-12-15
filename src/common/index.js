@@ -47,8 +47,14 @@ let render = (function () {
 
     };
 
-
 })();
+
+async function loadPageComponent(name, component) {
+    return await import(
+        /* webpackChunkName: '[request]' */
+        `../${component}.atom`
+    );
+}
 
 let loadPage = (() => {
 
@@ -62,9 +68,10 @@ let loadPage = (() => {
             throw error;
         }
 
-        let {component, load} = route;
+        let {component, load, chunk} = route;
 
-        let page = pages[component] || import(`../${component}.atom`);
+        let page = loadPageComponent(chunk, component);
+        // let page = pages[component] || import(`../${component}.atom`);
         let data = dehydratedData && dehydratedData.data || load(url);
 
         [page, data] = await Promise.all([page, data]);
