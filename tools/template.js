@@ -30,6 +30,17 @@ module.exports = function ({htmlWebpackPlugin, webpack: stats, webpackConfig}) {
         {}
     );
 
+    let assetMap = Object
+        .keys(stats.assetsByChunkName)
+        .filter(chunkName => !!pageMap[chunkName])
+        .reduce(
+            (map, chunkName) => {
+                map[chunkName] = stats.assetsByChunkName[chunkName];
+                return map;
+            },
+            {}
+        );
+
     let cssChunks = Object
         .keys(stats.assetsByChunkName)
         .reduce(
@@ -48,9 +59,16 @@ module.exports = function ({htmlWebpackPlugin, webpack: stats, webpackConfig}) {
 
     return template({
         stats,
+        files: htmlWebpackPlugin.files,
         cssChunks,
-        pages,
-        page
+        page: Object.assign(
+            {},
+            page,
+            {
+                assets: assetMap[page.chunkName]
+                    .map(asset => getOutputPath(asset, webpackConfig))
+            }
+        )
     });
 
 };

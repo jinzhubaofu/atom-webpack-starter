@@ -1,6 +1,6 @@
 <template>
     <section>
-        <tabs :tabs="tabs" />
+        <tabs :index="2" />
         <form @submit.prevent="add" class="form">
             <input
                 class="input"
@@ -20,27 +20,8 @@
 <script type="config">
 {
     props: ['likes'],
-    data: {
-        tabs: [
-            {
-                href: '/',
-                active: false,
-                label: 'home'
-            },
-            {
-                label: 'my info',
-                href: '/my/info',
-                active: false
-            },
-            {
-                label: 'my likes',
-                href: '/my/like',
-                active: true
-            }
-        ]
-    },
     components: {
-        'tabs': '../common/component/Tabs.atom'
+        'tabs': '../../common/component/Tabs.atom'
     }
 }
 </script>

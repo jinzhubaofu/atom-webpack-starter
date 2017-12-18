@@ -1,6 +1,13 @@
 <template>
     <article>
-        <h4 class="title">{{title}}</h4>
+        <h4 class="title">
+            <svg viewBox="0 0 129 129" @click="back">
+                <g>
+                    <path d="m88.6,121.3c0.8,0.8 1.8,1.2 2.9,1.2s2.1-0.4 2.9-1.2c1.6-1.6 1.6-4.2 0-5.8l-51-51 51-51c1.6-1.6 1.6-4.2 0-5.8s-4.2-1.6-5.8,0l-54,53.9c-1.6,1.6-1.6,4.2 0,5.8l54,53.9z"></path>
+                </g>
+            </svg>
+            {{title}}
+        </h4>
         <p
             a-for="section in sections"
             class="content"
@@ -16,14 +23,18 @@
 
 <style scoped>
 .title {
+    height: 2rem;
+    display: flex;
+    align-items: center;
     font-size: 1.5rem;
     color: cadetblue;
-    margin: .5rem 0
+    margin: 1rem 0
 }
-.title:before {
-    content: '#';
-    margin: .5rem;
-    color: #666;
+
+.title>svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    margin-right: 1rem;
 }
 .content {
     font-size: 1rem;
@@ -36,6 +47,9 @@ export default {
     methods: {
         hello() {
             console.log('hello');
+        },
+        back() {
+            history.go(-1);
         }
     }
 };

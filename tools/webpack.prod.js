@@ -37,12 +37,6 @@ module.exports = {
         path: path.resolve('output/static'),
         filename: '[name].[chunkhash:8].js',
         chunkFilename: '[name].[chunkhash:8].js',
-        umdNamedDefine: true,
-        library: {
-            root: 'main',
-            amd: 'atom-webpack-starter/[name]'
-        },
-        libraryTarget: 'umd',
         publicPath: '/'
     },
     module: {
@@ -103,30 +97,34 @@ module.exports = {
         ]
     },
     plugins: [
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            minChunks(module) {
+                return module.resource && /node_modules/.test(module.resource);
+            }
+        }),
         new webpack.DefinePlugin({
             'process.env': {
                 NODE_ENV: JSON.stringify('production')
             }
         }),
         new ExtractCssChunks('[name].[contenthash:8].css'),
-        // new ClosureCompilerPlugin({mode: 'STANDARD'}),
         // 为每个页面创建一个 template php 模板
         ...pages.map(page => {
-
             let filename = path.join(
                 __dirname,
                 '../output/template',
                 `${page.origin.replace(/\.atom$/, '.template.php')}`
             );
-
             return new HtmlWebpackPlugin({
                 template: 'tools/template.js',
                 filename: filename,
                 alwaysWriteToDisk: true,
                 page,
-                pages
+                pages,
+                inlineSource: 'main.js',
+                inject: false
             });
-
         }),
         new OptimizeCSSPlugin({
             cssProcessorOptions: {

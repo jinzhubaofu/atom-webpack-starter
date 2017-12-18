@@ -7,19 +7,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="x5-orientation" content="portrait">
-    <link rel="stylesheet" href="{{cssChunks[page.origin]}}" >
+    <link rel="stylesheet" href="{{page.assets[1]}}" >
 </head>
 <body>
-<nav id="main-nav">
-    <ul>
-        <li>
-            <a href="/my/info">info</a>
-        </li>
-        <li>
-            <a href="/my/like">like</a>
-        </li>
-    </ul>
-</nav>
 <div id="app">
 <?php echo $atom['html'] ?>
 </div>
@@ -41,5 +31,8 @@ if ($atom['props'] != null && !empty($atom['props'])) {
 window.__COMPONENT_PROPS__ = <?php echo json_encode($atom['props']) ?>;
 })();
 </script>
+<script src="{{files.chunks.vendor.entry|escape}}"></script>
+<script src="{{page.assets[0]}}"></script>
+<script src="{{files.chunks.main.entry|escape}}"></script>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <template>
-    <a class="main" :href="url" :data-sf-href="url">
+    <a class="main" :href="url" @click.prevent="jump(url)">
         <h4 class="title">{{title}}</h4>
         <p>{{summary}}</p>
         <footer class="footer">{{createTime}}</footer>
@@ -39,6 +39,7 @@ function computed_url($ctx) {
 }
 </script>
 <script>
+import locator from '../common/locator';
 export default {
     computed: {
         summary() {
@@ -50,6 +51,11 @@ export default {
         },
         url() {
             return `/post?id=${this.id}`;
+        }
+    },
+    methods: {
+        jump(url) {
+            locator.redirect(url);
         }
     }
 };

@@ -11,6 +11,7 @@ const glob = require('glob');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractCssChunks = require('extract-css-chunks-webpack-plugin');
+const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 
 const atomStyleCompiler = require('./atom-style-compiler');
 const atomScriptCompiler = require('./atom-script-compiler');
@@ -97,6 +98,12 @@ module.exports = {
         ]
     },
     plugins: [
+        new webpack.optimize.CommonsChunkPlugin({
+            name: 'vendor',
+            minChunks(module) {
+                return module.resource && /node_modules/.test(module.resource);
+            }
+        }),
         new webpack.NamedChunksPlugin(),
         new webpack.WatchIgnorePlugin([
             '**/*.php'
@@ -107,6 +114,7 @@ module.exports = {
         new HtmlWebpackHarddiskPlugin({
             outputPath: 'output/template'
         }),
+        new HtmlWebpackInlineSourcePlugin(),
         // 为每个页面创建一个 template php 模板
         ...pages.map(page => {
             return new HtmlWebpackPlugin({
@@ -114,7 +122,9 @@ module.exports = {
                 filename: `${page.origin.replace(/\.atom$/, '.template.php')}`,
                 alwaysWriteToDisk: true,
                 page,
-                pages
+                pages,
+                inlineSource: 'main.js',
+                inject: false
             });
         })
     ]

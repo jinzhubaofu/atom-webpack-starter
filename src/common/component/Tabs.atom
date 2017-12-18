@@ -1,0 +1,69 @@
+<template>
+    <ul class="navs">
+        <li a-for="tab, i in tabs">
+            <a
+                :class="i === index ? 'active' : ''"
+                :href="tab.href"
+                @click.prevent="!tab.active && jump(tab.href)">
+                {{tab.label}}
+            </a>
+        </li>
+    </ul>
+</template>
+<style scoped>
+.navs {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+.navs li {
+    height: 2rem;
+    flex: 1 1 0;
+    text-align: center;
+}
+
+.navs li a,
+.navs li a:visited {
+    color: #666;
+    text-decoration: none;
+}
+
+.navs li a.active,
+.navs li a.active:visited {
+    color: rgb(0, 159, 147);
+}
+
+</style>
+<script type="config">
+{
+    props: ['index'],
+    data: {
+        tabs: [
+            {
+                href: '/',
+                label: 'home'
+            },
+            {
+                label: 'my info',
+                href: '/my/info'
+            },
+            {
+                label: 'my likes',
+                href: '/my/like'
+            }
+        ]
+    }
+}
+</script>
+<script>
+import locator from '../locator';
+export default {
+    methods: {
+        jump(href) {
+            locator.redirect(href);
+        }
+    }
+};
+</script>

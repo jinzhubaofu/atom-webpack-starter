@@ -1,10 +1,7 @@
 <template>
     <div>
+        <tabs :index="0" />
         <div class="avatar"></div>
-        <nav class="nav">
-            <a class="nav-item" href="/my/info" data-sf-href="/my/info">my-info</a>
-            <a class="nav-item" href="/my/like" data-sf-href="/my/like">my-like</a>
-        </nav>
         <ul class="posts">
             <li a-for="post in posts" class="post">
                 <post
@@ -18,14 +15,11 @@
 </template>
 <script type="config">
 {
-    props: ['test', 'age'],
-    data: {
-        name: 'ludafa',
-        like: 1
-    },
+    props: ['posts', 'title'],
     components: {
         'app-layout': '../common/component/Layout.atom',
-        'post': './Post.atom'
+        'post': './Post.atom',
+        'tabs': '../common/component/Tabs.atom'
     }
 }
 </script>

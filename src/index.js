@@ -5,6 +5,7 @@
 
 import routes from './routes';
 import Atom from 'vip-server-renderer/js/atom';
+import locator from './common/locator';
 
 let render = (function () {
 
@@ -88,16 +89,19 @@ let loadPage = (() => {
 
 })();
 
+let initialSetup = true;
 
-function bootstrap(data, props) {
-    Array
-        .from(document.querySelectorAll('#main-nav li>a'))
-        .forEach(nav => nav.addEventListener('click', e => {
-            e.preventDefault();
-            loadPage(new URL(e.target.href));
-        }));
-    loadPage(new URL(location.href), {data, props});
-}
-
-
-bootstrap(window.__DATA__, window.__COMPONENT_PROPS__);
+locator
+    .on(location => {
+        loadPage(
+            location,
+            initialSetup
+                ? {
+                    data: window.__DATA__,
+                    props: window.__COMPONENT_PROPS__
+                }
+                : null
+        );
+        initialSetup = false;
+    })
+    .start();
