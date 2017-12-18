@@ -9,32 +9,34 @@ const webpack = require('webpack');
 const glob = require('glob');
 
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
+const ExtractCssChunks = require('extract-css-chunks-webpack-plugin');
 const atomStyleCompiler = require('./atom-style-compiler');
+const atomScriptCompiler = require('./atom-script-compiler');
+const ClosureCompilerPlugin = require('closure-webpack-plugin');
 
 const port = process.env.PORT || 9000;
 const root = path.join(__dirname, '..');
 const pages = glob.sync('src/**/index.atom').map(page => {
-    let name = page.slice(4, -11).replace(/\//g, '-').toLowerCase();
+    let origin = page.slice(4);
+    let name = origin.slice(0, -11).replace(/\//g, '-');
     return {
-        origin: page,
         path: path.join(root, page),
-        name: name
+        origin: origin,
+        name: name,
+        chunkName: origin.replace(/[\.\/]/g, '-')
     };
 });
 
-const entries = pages.reduce((entries, page) => {
-    entries[page.name] = page.path;
-    return entries;
-}, {});
-
 module.exports = {
-    entry: entries,
+    entry: {
+        main: path.resolve('src/index.js')
+    },
     output: {
         path: path.resolve('output/static'),
         filename: '[name].[chunkhash:8].js',
+        chunkFilename: '[name].[chunkhash:8].js',
         umdNamedDefine: true,
         library: {
             root: 'main',
@@ -45,13 +47,6 @@ module.exports = {
     },
     module: {
         rules: [
-            {
-                test: /index\.atom$/,
-                use: [
-                    'babel-loader',
-                    path.resolve('tools/entry-loader.js')
-                ]
-            },
             {
                 test: /\.atom$/,
                 use: [
@@ -76,7 +71,7 @@ module.exports = {
                                 return `${outputFilePath}.php`;
                             },
                             loaders: {
-                                css: ExtractTextPlugin.extract({
+                                css: ExtractCssChunks.extract({
                                     fallback: 'style-loader',
                                     use: 'css-loader'
                                 })
@@ -87,7 +82,7 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                loader: ExtractTextPlugin.extract({
+                loader: ExtractCssChunks.extract({
                     fallback: 'style-loader',
                     use: 'css-loader'
                 })
@@ -95,7 +90,7 @@ module.exports = {
             {
                 test: /\.js$/,
                 use: 'babel-loader',
-                exclude: /node_modules|tools/
+                exclude: /node_modules/
             },
             {
                 test: /\.(eot|woff|ttf|woff2|svg|png|jpe?g|gif)$/,
@@ -108,40 +103,41 @@ module.exports = {
         ]
     },
     plugins: [
-        new webpack.optimize.CommonsChunkPlugin({
-            name: 'vendor',
-            filename: 'vendor.[chunkhash:8].js',
-            minChunks: 0
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: JSON.stringify('production')
+            }
         }),
-        new ExtractTextPlugin('[name].[contenthash:8].css'),
+        new ExtractCssChunks('[name].[contenthash:8].css'),
+        // new ClosureCompilerPlugin({mode: 'STANDARD'}),
         // 为每个页面创建一个 template php 模板
-        ...pages.map(({name, origin}) => {
+        ...pages.map(page => {
 
             let filename = path.join(
                 __dirname,
                 '../output/template',
-                `${origin.slice(4).replace(/\.atom$/, '.template.php')}`
+                `${page.origin.replace(/\.atom$/, '.template.php')}`
             );
 
             return new HtmlWebpackPlugin({
                 template: 'tools/template.js',
                 filename: filename,
-                chunks: ['vendor', name],
-                source: origin,
-                name: name
+                alwaysWriteToDisk: true,
+                page,
+                pages
             });
 
+        }),
+        new OptimizeCSSPlugin({
+            cssProcessorOptions: {
+                safe: true
+            }
         }),
         new webpack.optimize.UglifyJsPlugin({
             compress: {
                 warnings: false
             },
             sourceMap: false
-        }),
-        new OptimizeCSSPlugin({
-            cssProcessorOptions: {
-                safe: true
-            }
         })
     ]
 };

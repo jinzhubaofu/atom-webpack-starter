@@ -1,4 +1,3 @@
-<?php /* template for page entry */ ?>
 <!DOCTYPE html>
 <html lang="zh">
 <head>
@@ -8,6 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <meta name="x5-orientation" content="portrait">
+    <link rel="stylesheet" href="{{cssChunks[page.origin]}}" >
 </head>
 <body>
 <nav id="main-nav">
@@ -24,7 +24,10 @@
 <?php echo $atom['html'] ?>
 </div>
 <script>
-var props = window.__COMPONENT_PROPS__ = <?php echo json_encode($atom['props']) ?>;
+(function () {
+{% if cssChunks -%}
+window.__CSS_CHUNKS__ = {{cssChunks|json(2)|raw}};
+{%- endif %}
 var data = window.__DATA__ = {};
 <?php
 if ($atom['props'] != null && !empty($atom['props'])) {
@@ -35,6 +38,8 @@ if ($atom['props'] != null && !empty($atom['props'])) {
     }
 }
 ?>
+window.__COMPONENT_PROPS__ = <?php echo json_encode($atom['props']) ?>;
+})();
 </script>
 </body>
 </html>

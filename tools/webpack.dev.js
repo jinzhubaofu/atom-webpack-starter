@@ -10,8 +10,7 @@ const glob = require('glob');
 
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const AssetsPlugin = require('assets-webpack-plugin');
+const ExtractCssChunks = require('extract-css-chunks-webpack-plugin');
 
 const atomStyleCompiler = require('./atom-style-compiler');
 const atomScriptCompiler = require('./atom-script-compiler');
@@ -19,49 +18,28 @@ const atomScriptCompiler = require('./atom-script-compiler');
 const port = process.env.PORT || 9000;
 const root = path.join(__dirname, '..');
 const pages = glob.sync('src/**/index.atom').map(page => {
-    let name = page.slice(4, -11).replace(/\//g, '-').toLowerCase();
+    let origin = page.slice(4);
+    let name = origin.slice(0, -11).replace(/\//g, '-');
     return {
-        origin: page,
         path: path.join(root, page),
-        name: name
+        origin: origin,
+        name: name,
+        chunkName: origin.replace(/[\.\/]/g, '-')
     };
 });
 
-const entries = pages.reduce((entries, page) => {
-    entries[page.name] = page.path;
-    return entries;
-}, {
-    bootstrap: [
-        'vip-server-renderer/js/atom',
-        path.resolve('src/common/index.js')
-    ]
-});
-
-let chunkIndex = 0;
-
 module.exports = {
-    entry: entries,
+    entry: {
+        main: path.resolve('src/index.js')
+    },
     devtool: 'inline-source-map',
     output: {
         filename: '[name].js',
         chunkFilename: '[name].js',
-        // umdNamedDefine: true,
-        // library: {
-        //     root: 'main',
-        //     amd: 'atom-webpack-starter/[name]'
-        // },
-        // libraryTarget: 'umd',
         publicPath: '/'
     },
     module: {
         rules: [
-            // {
-            //     test: /index\.atom$/,
-            //     use: [
-            //         'babel-loader',
-            //         path.resolve('tools/entry-loader.js')
-            //     ]
-            // },
             {
                 test: /\.atom$/,
                 use: [
@@ -87,7 +65,7 @@ module.exports = {
                                 return `${outputFilePath}.php`;
                             },
                             loaders: {
-                                css: ExtractTextPlugin.extract({
+                                css: ExtractCssChunks.extract({
                                     fallback: 'style-loader',
                                     use: 'css-loader'
                                 })
@@ -98,7 +76,7 @@ module.exports = {
             },
             {
                 test: /\.css$/,
-                loader: ExtractTextPlugin.extract({
+                loader: ExtractCssChunks.extract({
                     fallback: 'style-loader',
                     use: 'css-loader'
                 })
@@ -119,37 +97,25 @@ module.exports = {
         ]
     },
     plugins: [
-        new AssetsPlugin({
-            prettyPrint: true
-        }),
         new webpack.NamedChunksPlugin(),
-        // new webpack.NamedModulesPlugin(),
         new webpack.WatchIgnorePlugin([
             '**/*.php'
         ]),
-        // new webpack.optimize.CommonsChunkPlugin({
-        //     names: ['vendor'],
-        //     filename: '[name].js',
-        //     minChunks: Infinity
-        //     // module => (
-        //     //     module.context && module.context.includes('node_modules')
-        //     // )
-        // }),
-        new ExtractTextPlugin({
+        new ExtractCssChunks({
             filename: '[name].css'
-            // allChunks: true
         }),
         new HtmlWebpackHarddiskPlugin({
             outputPath: 'output/template'
         }),
         // 为每个页面创建一个 template php 模板
-        ...pages.map(({name, origin}) => new HtmlWebpackPlugin({
-            template: 'tools/template.js',
-            filename: `${origin.slice(4).replace(/\.atom$/, '.template.php')}`,
-            chunks: ['bootstrap'],
-            alwaysWriteToDisk: true,
-            source: origin,
-            name: name
-        }))
+        ...pages.map(page => {
+            return new HtmlWebpackPlugin({
+                template: 'tools/template.js',
+                filename: `${page.origin.replace(/\.atom$/, '.template.php')}`,
+                alwaysWriteToDisk: true,
+                page,
+                pages
+            });
+        })
     ]
 };
