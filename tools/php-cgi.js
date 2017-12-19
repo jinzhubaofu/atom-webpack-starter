@@ -198,7 +198,7 @@ function defaultMatch(url) {
     return /\.php($|\?)/.test(url.pathname)
 }
 
-exports.cgi = ({docRoot, match = defaultMatch, index}) => async (req, res, next) => {
+exports.cgi = ({docRoot, match = defaultMatch, index}) => (req, res, next) => {
 
     // stop stream until child-process is opened
     req.pause();
