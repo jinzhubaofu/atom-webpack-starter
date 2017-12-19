@@ -14,7 +14,7 @@ const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin');
 const ExtractCssChunks = require('extract-css-chunks-webpack-plugin');
 const atomStyleCompiler = require('./atom-style-compiler');
 const atomScriptCompiler = require('./atom-script-compiler');
-const ClosureCompilerPlugin = require('closure-webpack-plugin');
+const CleanAssetsPlugin = require('./clean-assets-webpack-plugin');
 
 const port = process.env.PORT || 9000;
 const root = path.join(__dirname, '..');
@@ -93,7 +93,10 @@ module.exports = {
             },
             {
                 test: /\.(eot|woff|ttf|woff2|svg|png|jpe?g|gif)$/,
-                loader: 'file-loader'
+                loader: 'file-loader',
+                options: {
+                    name: '[name].[hash:8].[ext]'
+                }
             },
             {
                 test: /\.html$/,
@@ -141,6 +144,30 @@ module.exports = {
                 warnings: false
             },
             sourceMap: false
-        })
+        }),
+        new CleanAssetsPlugin((() => {
+
+            let chunkNameMap = pages.reduce(
+                (map, page) => {
+                    map[page.chunkName] = 1;
+                    return map;
+                },
+                {vendor: 1, main: 1}
+            );
+
+            return file => {
+
+                if (file.ext !== 'js' && file.ext !== 'css') {
+                    return true;
+                }
+
+                console.log(file);
+
+                let toDelete = !!chunkNameMap[file.chunkName];
+                console.log(file, toDelete ? 'delete' : 'keep');
+                return toDelete;
+            };
+
+        })())
     ]
 };

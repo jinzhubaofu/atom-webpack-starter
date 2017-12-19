@@ -5,7 +5,7 @@
 拥有以下功能：
 
 1. SSR(server side render)支持
-2. 本地路由
+2. 本地路由(history API supported)
 3. 本地 mock 数据
 
 ### 运行环境
