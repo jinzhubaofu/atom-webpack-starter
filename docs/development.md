@@ -37,8 +37,8 @@
 另外，我们使用了 `html-webpack-plugin` 的 `template` 功能。 具体的，我们使用 `tools/template.js` 来完成生成的功能。它会根据 `tools/template.php` 的内容来生成定制版本的 php 文件。
 
 > template.php 是 swig 格式的；
-> 虽然是 swig 格式的，但是没有没输出什么页面定制的东西。
-> 目前的定制主要是指 chunk 的选取
+> 虽然是 swig 格式的，现在我们使用 swig 输出一些构建相关的数据在页面上。
+> html-webpack-plugin 已经不在使用 inject 的功能，完全通过 template.js 和 swig 来注入合适的数据和 chunks
 
 ## php ssr 的处理
 
