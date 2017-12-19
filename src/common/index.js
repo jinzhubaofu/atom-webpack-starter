@@ -3,7 +3,7 @@
  * @author leon <ludafa@outlook.com>
  */
 
-import Atom from 'vip-server-renderer/js/atom';
+import Atom from 'atom';
 
 export function init(MainComponent, data, props) {
     new Atom({

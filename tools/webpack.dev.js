@@ -42,6 +42,11 @@ module.exports = {
         },
         libraryTarget: 'umd'
     },
+    resolve: {
+        alias: {
+            atom: 'vip-server-renderer/js/atom.js'
+        }
+    },
     module: {
         rules: [
             {
