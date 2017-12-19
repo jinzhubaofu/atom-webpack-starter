@@ -4,7 +4,7 @@
  */
 
 import routes from './routes';
-import Atom from 'vip-server-renderer/js/atom';
+import Atom from 'atom';
 import locator from './common/locator';
 
 let render = (function () {

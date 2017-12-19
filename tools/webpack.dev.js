@@ -11,7 +11,6 @@ const glob = require('glob');
 const HtmlWebpackHarddiskPlugin = require('html-webpack-harddisk-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractCssChunks = require('extract-css-chunks-webpack-plugin');
-const HtmlWebpackInlineSourcePlugin = require('html-webpack-inline-source-plugin');
 
 const atomStyleCompiler = require('./atom-style-compiler');
 const atomScriptCompiler = require('./atom-script-compiler');
@@ -38,6 +37,11 @@ module.exports = {
         filename: '[name].js',
         chunkFilename: '[name].js',
         publicPath: '/'
+    },
+    resolve: {
+        alias: {
+            'atom': 'vip-server-renderer/js/atom.js'
+        }
     },
     module: {
         rules: [
@@ -114,7 +118,6 @@ module.exports = {
         new HtmlWebpackHarddiskPlugin({
             outputPath: 'output/template'
         }),
-        new HtmlWebpackInlineSourcePlugin(),
         // 为每个页面创建一个 template php 模板
         ...pages.map(page => {
             return new HtmlWebpackPlugin({
@@ -129,3 +132,5 @@ module.exports = {
         })
     ]
 };
+
+console.log(module.exports);

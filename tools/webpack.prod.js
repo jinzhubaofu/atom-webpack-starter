@@ -39,6 +39,11 @@ module.exports = {
         chunkFilename: '[name].[chunkhash:8].js',
         publicPath: '/'
     },
+    resolve: {
+        alias: {
+            'atom': 'vip-server-renderer/js/atom.min.js'
+        }
+    },
     module: {
         rules: [
             {

@@ -32,7 +32,7 @@
 <script type="php">
 function computed_summary($ctx) {
     $desc = $ctx->_d['description'];
-    return mb_strlen($desc) > 50 ? substr($desc, 50) . '...' : $desc;
+    return mb_strlen($desc) > 50 ? substr($desc, 0, 50) . '...' : $desc;
 }
 function computed_url($ctx) {
     return '/post?id=' . $ctx->_d['id'];
