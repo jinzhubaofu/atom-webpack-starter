@@ -5,8 +5,9 @@
 拥有以下功能：
 
 1. SSR(server side render)支持
-2. 本地路由(history API supported)
+2. 基于 webpack dynamic code splitting 的 spa 解决方案
 3. 本地 mock 数据
+4. 本地路由(history API supported)
 
 ### 运行环境
 
@@ -131,16 +132,17 @@ src
 ```text
 output
 ├── static
-│   ├── 9a6f4ee0d85fd3fe0b6ce2470cbd1b78.jpg
-│   ├── home.43d2243c.css
-│   ├── home.dea0247c.js
-│   ├── my-info.c400c0d8.js
-│   ├── my-info.d710c5fa.css
-│   ├── my-like.97cdd578.css
-│   ├── my-like.f7e4f1e1.js
-│   ├── post.0532d5a4.css
-│   ├── post.96916ac8.js
-│   └── vendor.25ce2d60.js
+│   ├── Home-index-atom.0b082259.js
+│   ├── Home-index-atom.3ee004a7.css
+│   ├── My-Info-index-atom.27050842.css
+│   ├── My-Info-index-atom.519703d8.js
+│   ├── My-Like-index-atom.85ab7347.css
+│   ├── My-Like-index-atom.d7842ad1.js
+│   ├── Post-index-atom.139101d3.js
+│   ├── Post-index-atom.9bcf2b0a.css
+│   ├── cat.9a6f4ee0.jpg
+│   ├── main.bcd6ed64.js
+│   └── vendor.734cd7bc.js
 └── template
     ├── Home
     │   ├── Post.atom.php
@@ -150,18 +152,16 @@ output
     │   ├── Info
     │   │   ├── index.atom.php
     │   │   └── index.template.php
-    │   ├── Like
-    │   │   ├── index.atom.php
-    │   │   └── index.template.php
-    │   └── common
-    │       └── component
-    │           └── Tabs.atom.php
+    │   └── Like
+    │       ├── index.atom.php
+    │       └── index.template.php
     ├── Post
     │   ├── index.atom.php
     │   └── index.template.php
     └── common
         └── component
-            └── Layout.atom.php
+            ├── Layout.atom.php
+            └── Tabs.atom.php
 ```
 
 其中需要注意的有：
@@ -172,6 +172,7 @@ output
 
     1. 每个页面都有一个入口 js 和 css
     2. 所有的依赖包都合并为 vendor.js
+    3. 启动入口为 main.js
 
 2. `template` 目录下是所有在 SSR 过程需要的 php 文件：
 
@@ -192,9 +193,11 @@ output
 
             ```js
             // SSR JS 启动需要的数据
-            window.__DATA__ = {};
+            window.__DATA__ = { ... };
             // atom 组件的属性名列表
             window.__COMPONENT_PROPS__ = [ ... ];
+            // code splitting 需要的 css chunks 配置
+            window.__CSS_CHUNKS = { ... };
             ```
 
     2. *.atom.php

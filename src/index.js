@@ -68,7 +68,7 @@ let loadPage = (() => {
             let {component, load, chunk} = route;
 
             let [page, data] = await Promise.all([
-                import(`./${component}.atom`),
+                pages[component] || import(`./${component}.atom`),
                 dehydratedData && dehydratedData.data || await load(url)
             ]);
 

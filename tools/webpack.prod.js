@@ -130,7 +130,6 @@ module.exports = {
                 alwaysWriteToDisk: true,
                 page,
                 pages,
-                inlineSource: 'main.js',
                 inject: false
             });
         }),
@@ -145,6 +144,7 @@ module.exports = {
             },
             sourceMap: false
         }),
+        // 只保留每个页面入口的 atom 产生的 chunk
         new CleanAssetsPlugin((() => {
 
             let chunkNameMap = pages.reduce(
@@ -156,16 +156,10 @@ module.exports = {
             );
 
             return file => {
-
                 if (file.ext !== 'js' && file.ext !== 'css') {
                     return true;
                 }
-
-                console.log(file);
-
-                let toDelete = !!chunkNameMap[file.chunkName];
-                console.log(file, toDelete ? 'delete' : 'keep');
-                return toDelete;
+                return !!chunkNameMap[file.chunkName];
             };
 
         })())

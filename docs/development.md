@@ -78,3 +78,123 @@ node server 对于本地路由配置中的请求 URL，请此类请求转发给 
 
     > 注意，我们将所有的请求都转交给 `tools/server.php` (SCRIPT_FILE)来处理
     > `tools/server.php` 会根据请求路径和 `tools/routes` 来找到匹配的 `atom` 组件，并进行 SSR 处理
+
+## 基于 webpack dynamic code splitting 的 spa 解决方案
+
+本 repo 中采用了基于 webpack 通过 `import()` 语法来支持动态的 chunk 加载。
+
+在 `src/index.js` 中的 `loadPage()` 函数可以看到具体的用法：
+
+```js
+let loadPage = (() => {
+
+    let pages = {};
+
+    return async (url, dehydratedData) => {
+
+        try {
+
+            let route = routes.find(({pattern}) => (pattern === url.pathname));
+
+            if (!route) {
+                throw error;
+            }
+
+            let {component, load, chunk} = route;
+
+            let [page, data] = await Promise.all([
+                pages[component] || import(`./${component}.atom`),
+                dehydratedData && dehydratedData.data || await load(url)
+            ]);
+
+            pages[component] = page;
+
+            render(
+                page,
+                data,
+                Array.isArray(page.props) ? page.props : Object.keys(page.props)
+            );
+
+        }
+        catch (e) {
+            console.error(e);
+        }
+
+    };
+
+})();
+```
+
+其中，最关键的一句就是这个：
+
+```js
+let [page, data] = await Promise.all([
+    pages[component] || import(`./${component}.atom`),
+    dehydratedData && dehydratedData.data || await load(url)
+]);
+```
+
+首先，webpack 会根据 `import()` 的参数 `./${component}.atom` 来遍历 context 中符合路径模式的所有模块，把它们都生成一个 `chunk`，最后再编译为 `asset` 输出出来。
+
+接下来我们遇到了几个问题：
+
+1. webpack 会把不是页面入口的 atom 也生成为 chunk。
+
+    这个问题我们通过 `tools/clean-assets-webpack-plugin` 把不是入口的 chunk 给删掉。
+
+2. webpack 会生成 `import()` 来动态加载页面入口的 js chunk，但是 `extract-css-webpack-plugin` 不能为这种 chunk 生成独立的 css。
+
+    这个问题我们使用 `extract-css-chunks-webpack-plugin` 来替换 `extract-css-webpack-plugin`。
+
+3. 现在我们有了每个页面的入口 chunk(js + css)，但是在 `import()` 位置只会加载 js，而不会加载对应的 css。
+
+    这个问题我们需要在 `import()` 编译时，将它转译成两段加载，即加载 js 和加载 css。
+
+    这个功能我们通过引入 `babel-plugin-dual-import` 来完成。它可以做这样一个事情：
+
+    ```js
+    import('./Foo.js')
+
+      ↓ ↓ ↓ ↓ ↓ ↓
+
+    import importCss from 'babel-plugin-dual-import/importCss.js'
+
+    Promise.all([
+        import( /* webpackChunkName: 'Foo' */ './Foo'),
+        importCss('Foo')
+    ]).then(promises => promises[0]);
+    ```
+
+    这样我们拿到 js chunk 时，对应的 css 也完成了加载。
+
+4. 接下来，又有一个问题：我们怎么知道页面入口 js chunk 的对应 css。
+
+    由于我们的页面入口 chunk 是构建产物，对应的 css 也同样是构建产物。其中的 hash 会干扰我们对它们的定位。
+
+    因此，我们在模板中需要输出页面入口 js 的 chunkName 与 css 之间的对应关系。这样在页面切换时，才能找到指定 chunk 的对应 css。
+
+    这个功能我们是通过 `html-webpack-plugin` 生成 `*.template.php` 时解决的。
+
+    我们会在页面上输出一个全局变量 `window.__CSS_CHUNKS`，作为 css 加载的配置表：
+
+    ```html
+    <script>
+    window.__CSS_CHUNKS__ = {
+        "Home/index.atom": "/Home-index-atom.css",
+        "My/Info/index.atom": "/My-Info-index-atom.css",
+        "My/Like/index.atom": "/My-Like-index-atom.css",
+        "Post/index.atom": "/Post-index-atom.css"
+    };
+    </script>
+    ```
+
+    其中，这个配置表中的 key 是 js chunk 对应的模块名，value 是对应的 css 路径。
+
+    最后，`importCss()` 会使用 `window.__CSS_CHUNKS__` 的配置加载 css。
+
+5. 前端路由(history API)
+
+    我们使用了一个简单的 history API 小工具 [numen](https://github.com/jinzhubaofu/numen)
+
+    在使用这个架构时，需要注意 `<a>` 的跳转都需要阻止默认事件处理，通过 `locator.redirect` 来完成。
+

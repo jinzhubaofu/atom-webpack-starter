@@ -126,7 +126,6 @@ module.exports = {
                 alwaysWriteToDisk: true,
                 page,
                 pages,
-                inlineSource: 'main.js',
                 inject: false
             });
         })
