@@ -160,6 +160,12 @@ function execute(req, res, next, url, file) {
         // extract headers
         php.stdin.end();
 
+        if (err) {
+            console.error(err);
+            res.status(500).send(err).end();
+            return;
+        }
+
         let lines = result.split('\r\n');
         let line = 0;
         let html = '';
